@@ -1,0 +1,6 @@
+name = sales_tokens_boston
+description = module containing custom civiCRM tokens for mails to Sales Contact individuals containing booth information stored in their organization
+dependencies[] = civicrm
+package = CiviCRM
+core = 7.x
+version = 7.x-1.0
