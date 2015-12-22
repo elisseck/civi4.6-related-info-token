@@ -1,0 +1,62 @@
+<?php
+// Sales_Tokens_Boston defines custom tokens for the nesea.org civiCRM installation.
+// These tokens allow the sales person to email individual contacts with relationship type 'Boston Sales Contact' and include tokens
+// from the exhibitor information custom fieldset stored in the organizational record they hold that relationship type with.
+ 
+
+// define custom token array as they will appear in civiCRM
+function sales_tokens_boston_civicrm_tokens(&$tokens) {
+  $tokens['salesContactBoston'] = array(
+    'salesContactBoston.be16_booth_size' => 'BE16 Booth Size',
+	'salesContactBoston.be16_booth_number' => 'BE16 Booth Number',
+	'salesContactBoston.be16_coi' => 'BE16 COI',
+	'salesContactBoston.company_description' => 'Company Description',
+	'salesContactBoston.linkedin' => 'LinkedIn',
+	'salesContactBoston.facebook' => 'Facebook',
+	'salesContactBoston.twitter' => 'Twitter',
+  );
+}
+
+// search up values and attribute to the defined tokens
+function sales_tokens_boston_civicrm_tokenValues(&$details, $contactIDs, $jobID = null, $tokens = array(), $className = null) {
+  foreach ($contactIDs as $cid) {
+// nested api call to grab custom exhibitor fields based on relationship type 'Boston Sales Contact', wrapped in try-catch block so a bad call by user won't break site
+    try{
+      $result = civicrm_api3('Relationship', 'getsingle', array(
+        'sequential' => 1,
+        'contact_id_b' => $cid,
+        'relationship_type_id' => 13,
+        'api.Contact.getsingle' => array('id' => "\$value.contact_id_a", 'return' => array("custom_103", "custom_104", "custom_109", "custom_111", "custom_22", "custom_25", "custom_24")),
+        'options' => array('limit' => 1),
+        'is_active' => 1,
+      ));
+// check array keys to determine which tokens were called for, and define those token values
+	  if (array_key_exists('be16_booth_size', $tokens['salesContactBoston'])) {
+	    $details[$cid]['salesContactBoston.be16_booth_size'] = $result['api.Contact.getsingle']['custom_103'];
+	  }
+	  if (array_key_exists('be16_booth_number', $tokens['salesContactBoston'])) {
+        $details[$cid]['salesContactBoston.be16_booth_number'] = $result['api.Contact.getsingle']['custom_104'];
+	  }
+	  if (array_key_exists('be16_coi', $tokens['salesContactBoston'])) {
+        $details[$cid]['salesContactBoston.be16_coi'] = $result['api.Contact.getsingle']['custom_109'];
+	  }
+	  if (array_key_exists('company_description', $tokens['salesContactBoston'])) {
+        $details[$cid]['salesContactBoston.company_description'] = $result['api.Contact.getsingle']['custom_111'];
+	  }
+	  if (array_key_exists('linkedin', $tokens['salesContactBoston'])) {
+        $details[$cid]['salesContactBoston.linkedin'] = $result['api.Contact.getsingle']['custom_22'];
+	  }
+	  if (array_key_exists('facebook', $tokens['salesContactBoston'])) {
+        $details[$cid]['salesContactBoston.facebook'] = $result['api.Contact.getsingle']['custom_25'];
+	  }
+	  if (array_key_exists('twitter', $tokens['salesContactBoston'])) {
+        $details[$cid]['salesContactBoston.twitter'] = $result['api.Contact.getsingle']['custom_24'];
+	  }
+    }
+// catch api3 errors in watchdog
+	catch (CiviCRM_API3_Exception $e) {
+      watchdog('sales_tokens_boston', $error = $e->getMessage());
+    }
+  }
+}
+?>
