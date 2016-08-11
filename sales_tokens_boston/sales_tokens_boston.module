@@ -7,56 +7,80 @@
 // define custom token array as they will appear in civiCRM
 function sales_tokens_boston_civicrm_tokens(&$tokens) {
   $tokens['salesContactBoston'] = array(
-    'salesContactBoston.be16_booth_size' => 'BE16 Booth Size',
-	'salesContactBoston.be16_booth_number' => 'BE16 Booth Number',
-	'salesContactBoston.be16_coi' => 'BE16 COI',
+    'salesContactBoston.be17_booth_size' => 'BE17 Booth Size',
+	'salesContactBoston.be17_booth_number' => 'BE17 Booth Number',
+	'salesContactBoston.be17_booth_location' => 'BE17 Booth Location',
 	'salesContactBoston.company_description' => 'Company Description',
 	'salesContactBoston.linkedin' => 'LinkedIn',
 	'salesContactBoston.facebook' => 'Facebook',
 	'salesContactBoston.twitter' => 'Twitter',
+	'salesContactBoston.organization_name' => 'Organization Name',
+	'salesContactBoston.city' => 'Org City',
+	'salesContactBoston.url' => 'Org Website',
+	'salesContactBoston.booth_staff_registered' => 'Booth Staff Registered',
   );
 }
 
 // search up values and attribute to the defined tokens
 function sales_tokens_boston_civicrm_tokenValues(&$details, $contactIDs, $jobID = null, $tokens = array(), $className = null) {
-  foreach ($contactIDs as $cid) {
+// check to see if any of these tokens are called for, and if they aren't, just end
+  if (empty($tokens['salesContactBoston'])) {
+	  return;
+  } else {
+      foreach ($contactIDs as $cid) {
 // nested api call to grab custom exhibitor fields based on relationship type 'Boston Sales Contact', wrapped in try-catch block so a bad call by user won't break site
-    try{
-      $result = civicrm_api3('Relationship', 'getsingle', array(
-        'sequential' => 1,
-        'contact_id_b' => $cid,
-        'relationship_type_id' => 13,
-        'api.Contact.getsingle' => array('id' => "\$value.contact_id_a", 'return' => array("custom_103", "custom_104", "custom_109", "custom_111", "custom_22", "custom_25", "custom_24")),
-        'options' => array('limit' => 1),
-        'is_active' => 1,
-      ));
+        try {
+			$result = civicrm_api3('Relationship', 'get', array(
+			'sequential' => 1,
+			'contact_id_b' => $cid,
+			'relationship_type_id' => 13,
+			'api.Contact.getsingle' => array('id' => "\$value.contact_id_a", 'return' => array("custom_191", "custom_192", "custom_193" "custom_111", "custom_22", "custom_25", "custom_24", "organization_name", "custom_189")),
+			'api.Address.get' => array('contact_id' => "\$value.contact_id_a", 'is_primary' => 1, 'return' => array("city")),
+			'api.Website.get' => array('contact_id' => "\$value.contact_id_a", 'website_type_id' => "Main", 'return' => array("url")),
+			'options' => array('limit' => 1),
+			'is_active' => 1,
+			));
 // check array keys to determine which tokens were called for, and define those token values
-	  if (array_key_exists('be16_booth_size', $tokens['salesContactBoston'])) {
-	    $details[$cid]['salesContactBoston.be16_booth_size'] = $result['api.Contact.getsingle']['custom_103'];
-	  }
-	  if (array_key_exists('be16_booth_number', $tokens['salesContactBoston'])) {
-        $details[$cid]['salesContactBoston.be16_booth_number'] = $result['api.Contact.getsingle']['custom_104'];
-	  }
-	  if (array_key_exists('be16_coi', $tokens['salesContactBoston'])) {
-        $details[$cid]['salesContactBoston.be16_coi'] = $result['api.Contact.getsingle']['custom_109'];
-	  }
-	  if (array_key_exists('company_description', $tokens['salesContactBoston'])) {
-        $details[$cid]['salesContactBoston.company_description'] = $result['api.Contact.getsingle']['custom_111'];
-	  }
-	  if (array_key_exists('linkedin', $tokens['salesContactBoston'])) {
-        $details[$cid]['salesContactBoston.linkedin'] = $result['api.Contact.getsingle']['custom_22'];
-	  }
-	  if (array_key_exists('facebook', $tokens['salesContactBoston'])) {
-        $details[$cid]['salesContactBoston.facebook'] = $result['api.Contact.getsingle']['custom_25'];
-	  }
-	  if (array_key_exists('twitter', $tokens['salesContactBoston'])) {
-        $details[$cid]['salesContactBoston.twitter'] = $result['api.Contact.getsingle']['custom_24'];
-	  }
-    }
+			if (array_key_exists('be17_booth_size', $tokens['salesContactBoston'])) {
+				$details[$cid]['salesContactBoston.be17_booth_size'] = $result['values'][0]['api.Contact.getsingle']['custom_191'];
+			}
+			if (array_key_exists('be17_booth_number', $tokens['salesContactBoston'])) {
+				$details[$cid]['salesContactBoston.be17_booth_number'] = $result['values'][0]['api.Contact.getsingle']['custom_192'];
+			}
+			if (array_key_exists('be17_booth_location', $tokens['salesContactBoston'])) {
+				$details[$cid]['salesContactBoston.be17_booth_location'] = $result['values'][0]['api.Contact.getsingle']['custom_193'];
+			}
+			if (array_key_exists('company_description', $tokens['salesContactBoston'])) {
+				$details[$cid]['salesContactBoston.company_description'] = $result['values'][0]['api.Contact.getsingle']['custom_111'];
+			}
+			if (array_key_exists('linkedin', $tokens['salesContactBoston'])) {
+				$details[$cid]['salesContactBoston.linkedin'] = $result['values'][0]['api.Contact.getsingle']['custom_22'];
+			}
+			if (array_key_exists('facebook', $tokens['salesContactBoston'])) {
+				$details[$cid]['salesContactBoston.facebook'] = $result['values'][0]['api.Contact.getsingle']['custom_25'];
+			}
+			if (array_key_exists('twitter', $tokens['salesContactBoston'])) {
+				$details[$cid]['salesContactBoston.twitter'] = $result['values'][0]['api.Contact.getsingle']['custom_24'];
+			}
+			if (array_key_exists('organization_name', $tokens['salesContactBoston'])) {
+				$details[$cid]['salesContactBoston.organization_name'] = $result['values'][0]['api.Contact.getsingle']['organization_name'];
+			}
+			if (array_key_exists('booth_staff_registered', $tokens['salesContactBoston'])) {
+				$details[$cid]['salesContactBoston.booth_staff_registered'] = $result['values'][0]['api.Contact.getsingle']['custom_189'];
+			}
+			if (array_key_exists('city', $tokens['salesContactBoston'])) {
+				$details[$cid]['salesContactBoston.city'] = $result['values'][0]['api.Address.get']['values'][0]
+				['city'];
+			}
+			if (array_key_exists('url', $tokens['salesContactBoston'])) {
+				$details[$cid]['salesContactBoston.url'] = $result['values'][0]['api.Website.get']['values'][0]['url'];
+			}
+		}
 // catch api3 errors in watchdog
-	catch (CiviCRM_API3_Exception $e) {
-      watchdog('sales_tokens_boston', $error = $e->getMessage());
-    }
+		catch (CiviCRM_API3_Exception $e) {
+		watchdog('sales_tokens_boston', $error = $e->getMessage());
+		}
+	 }
   }
 }
 ?>
