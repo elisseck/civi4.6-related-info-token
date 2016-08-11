@@ -83,4 +83,3 @@ function sales_tokens_boston_civicrm_tokenValues(&$details, $contactIDs, $jobID 
 	 }
   }
 }
-?>
