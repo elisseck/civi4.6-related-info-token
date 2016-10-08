@@ -1,10 +1,19 @@
 <?php
-// Sales_Tokens_Boston defines custom tokens for the nesea.org civiCRM installation.
-// These tokens allow the sales person to email individual contacts with relationship type 'Boston Sales Contact' and include tokens
-// from the exhibitor information custom fieldset stored in the organizational record they hold that relationship type with.
- 
+/**
+ *  @file 
+ *  Sales_Tokens_Boston defines custom tokens for the nesea.org civiCRM installation.
+ *
+ */
 
-// define custom token array as they will appear in civiCRM
+/** 
+ * Implements hook_civicrm_tokens().
+ *
+ * Define custom token array as they will appear in civiCRM.
+ *
+ * @ param &$tokens
+ *    reference to the associative array of custom tokens that are available.
+ */
+
 function sales_tokens_boston_civicrm_tokens(&$tokens) {
   $tokens['salesContactBoston'] = array(
     'salesContactBoston.be17_booth_size' => 'BE17 Booth Size',
@@ -21,20 +30,36 @@ function sales_tokens_boston_civicrm_tokens(&$tokens) {
   );
 }
 
-// search up values and attribute to the defined tokens
+/** 
+ * Implements hook_civicrm_tokenValues().
+ *
+ * Get all the values for the tokens registered.
+ *
+ * @ param $values 
+ *    array of values, keyed by contact id.
+ * @ param $cids 
+ *    array of contactIDs that the system needs values for.
+ * @ param $job 
+ *    the job_id.
+ * @ param $tokens 
+ *    tokens used in the mailing.
+ * @ param $context 
+ *    the class name.
+ */
+ 
 function sales_tokens_boston_civicrm_tokenValues(&$details, $contactIDs, $jobID = null, $tokens = array(), $className = null) {
-// check to see if any of these tokens are called for, and if they aren't, just end
+// check to see if any of these tokens are actually called for
   if (empty($tokens['salesContactBoston'])) {
 	  return;
   } else {
       foreach ($contactIDs as $cid) {
-// nested api call to grab custom exhibitor fields based on relationship type 'Boston Sales Contact', wrapped in try-catch block so a bad call by user won't break site
+// call civicrm apiv3 with try-catch block so a bad call by user won't break site
         try {
 			$result = civicrm_api3('Relationship', 'get', array(
 			'sequential' => 1,
 			'contact_id_b' => $cid,
 			'relationship_type_id' => 13,
-			'api.Contact.getsingle' => array('id' => "\$value.contact_id_a", 'return' => array("custom_191", "custom_192", "custom_193" "custom_111", "custom_22", "custom_25", "custom_24", "organization_name", "custom_189")),
+			'api.Contact.getsingle' => array('id' => "\$value.contact_id_a", 'return' => array("custom_191", "custom_192", "custom_193", "custom_111", "custom_22", "custom_25", "custom_24", "organization_name", "custom_189")),
 			'api.Address.get' => array('contact_id' => "\$value.contact_id_a", 'is_primary' => 1, 'return' => array("city")),
 			'api.Website.get' => array('contact_id' => "\$value.contact_id_a", 'website_type_id' => "Main", 'return' => array("url")),
 			'options' => array('limit' => 1),
